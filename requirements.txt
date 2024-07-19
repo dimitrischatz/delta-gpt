@@ -6,5 +6,5 @@ yfinance
 plotly
 openai
 tenacity
-dotenv
+python-dotenv
 requests
