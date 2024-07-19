@@ -10,6 +10,10 @@ app = Quart(__name__)
 cors(app)  # Enable CORS for all routes
 
 
+@app.route('/')
+def home():
+    return "Delta GPT API is live!!"
+
 
 
 @app.route('/deltagpt_api', methods=['POST'])

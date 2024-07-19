@@ -1,0 +1,10 @@
+quart
+quart-cors
+numpy
+scipy
+yfinance
+plotly
+openai
+tenacity
+dotenv
+requests
