@@ -1,8 +1,8 @@
 import json
 import numpy as np
-from OptionPackage.option_definitions import VanillaOption
-from OptionPackage.OptionPositionClass import OptionPosition
-import config
+from .OptionPackage.option_definitions import VanillaOption
+from .OptionPackage.OptionPositionClass import OptionPosition
+from . import config
 
 response_json = {"message":None, "plot": None}
 

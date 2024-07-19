@@ -1,4 +1,4 @@
-from OptionPackage.OptionPortfolioClass import OptionPortfolio
+from .OptionPackage.OptionPortfolioClass import OptionPortfolio
 
 
 # In this file we store some global variables

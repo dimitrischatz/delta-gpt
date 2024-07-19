@@ -1,10 +1,10 @@
 from quart import Quart, request, jsonify
 from quart_cors import cors
 import json
-import config
-from OptionPackage.OptionPortfolioClass import OptionPortfolio
-from gpt_completion import gpt_completion
-from gpt_tools import tools
+from . import config
+from .OptionPackage.OptionPortfolioClass import OptionPortfolio
+from .gpt_completion import gpt_completion
+from .gpt_tools import tools
 
 app = Quart(__name__)
 cors(app)  # Enable CORS for all routes

@@ -3,7 +3,7 @@ from openai import OpenAI, AsyncOpenAI
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from dotenv import load_dotenv
 import os
-from gpt_tools import *
+from .gpt_tools import *
 
 load_dotenv()  # This loads the environment variables from the .env file
 
