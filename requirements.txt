@@ -8,3 +8,4 @@ openai
 tenacity
 python-dotenv
 requests
+uvicorn
