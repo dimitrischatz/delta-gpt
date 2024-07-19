@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeltaGPT</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.3/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/2.1.3/marked.min.js"></script>
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        header {
+            background-color: #1e1e1e;
+            color: gray;
+            text-align: center;
+            padding: 15px 0;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            padding-top: 25px; /* Increased to accommodate header */
+            padding-bottom: 25px; /* Increased to accommodate input area */
+        }
+        .input-area {
+            display: flex;
+            padding: 10px;
+            background-color: #1e1e1e;
+            border-top: 1px solid #3a3a3a;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #3a3a3a;
+            border-radius: 20px;
+            padding: 5px 15px;
+        }
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            overflow-y: auto;
+            padding: 10px;
+            width: 60%;
+            max-width: 1000px;
+            height: calc(100vh - 140px); /* Adjust based on header and input area heights */
+            margin: 0 auto;
+        }
+        
+        .message {
+            margin: 10px 0; /* Add margin to prevent overlap */
+            padding: 10px 18px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 80%;
+        }
+        .user-message {
+            align-self: flex-end;
+            background-color: #343541;
+            color: white;
+        }
+        .bot-message {
+            align-self: flex-start;
+            background-color: #1e1e1e;
+            color: white;
+        }
+        .bot-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid #808080;
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: absolute;
+            left: 10px;
+            top: 10px;
+        }
+
+        .bot-icon::before {
+            content: "Δ";
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            font-weight: bold;
+            font-style: italic;
+            color: #656EF2;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background-color: transparent;
+            color: #ffffff;
+            font-size: 16px;
+        }
+        #user-input:focus {
+            outline: none;
+        }
+        #send-button {
+            background-color: transparent;
+            border: none;
+            color: #0084ff;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        .input-icon {
+            color: #888;
+            margin-right: 10px;
+        }
+        .plot-container {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .message-text {
+            width: 100%;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        .message-text > * {
+            margin-bottom: 10px;
+        }
+
+        .message-text > *:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>DeltaGPT</h1>
+    </header>
+    <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will be added here dynamically -->
+        </div>
+        <div class="input-area">
+            <div class="input-container">
+                <input type="text" id="user-input" placeholder="Message DeltaGPT">
+                <button id="send-button">↑</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        let messages = [];  // Local storage for messages
+        let portfolio = [];
+
+        /*
+        function addMessage(message, isUser) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(isUser ? 'user-message' : 'bot-message');
+            
+            if (!isUser) {
+                const iconElement = document.createElement('div');
+                iconElement.classList.add('bot-icon');
+                messageElement.appendChild(iconElement);
+            }
+            
+            const textElement = document.createElement('div');
+            textElement.textContent = message;
+            messageElement.appendChild(textElement);
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        */
+
+        /*
+        function addMessage(message, isUser) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(isUser ? 'user-message' : 'bot-message');
+            
+            if (!isUser) {
+                // Add the bot icon
+                const iconElement = document.createElement('div');
+                iconElement.classList.add('bot-icon');
+                messageElement.appendChild(iconElement);
+            }
+            
+            // Create the container for the text
+            const textElement = document.createElement('div');
+            
+            // Check if the message is from the user or the bot
+            if (isUser) {
+                textElement.textContent = message; // Set text directly for user messages
+            } else {
+                // Parse Markdown for bot messages and set as HTML
+                textElement.innerHTML = marked.parse(message);
+            }
+            
+            // Append the text element to the message container
+            messageElement.appendChild(textElement);
+            
+            // Append the message to the chat container
+            chatMessages.appendChild(messageElement);
+            // Scroll to the latest message
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        */
+
+        function addMessage(message, isUser) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(isUser ? 'user-message' : 'bot-message');
+            
+            if (!isUser) {
+                const iconElement = document.createElement('div');
+                iconElement.classList.add('bot-icon');
+                messageElement.appendChild(iconElement);
+            }
+            
+            const textElement = document.createElement('div');
+            textElement.classList.add('message-text');
+
+            if (isUser) {
+                textElement.textContent = message;
+            } else {
+                // Sanitize and render markdown
+                const sanitizedMessage = DOMPurify.sanitize(message);
+                textElement.innerHTML = marked.parse(sanitizedMessage);
+            }
+            messageElement.appendChild(textElement);
+            chatMessages.appendChild(messageElement);
+
+            // Force a reflow to ensure proper layout
+            messageElement.offsetHeight;
+
+            // Scroll to the bottom
+            requestAnimationFrame(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+
+
+        function addPlot(plotData) {
+            // Create a container for the Plotly plot
+            const plotContainer = document.createElement('div');
+            plotContainer.classList.add('plot-container');
+            // Generate a unique ID using a timestamp or a counter
+            const uniqueId = 'plotDiv-' + Date.now();  // Generates a unique ID based on the current timestamp
+            plotContainer.setAttribute('id', uniqueId);
+            chatMessages.appendChild(plotContainer);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Use Plotly.react to efficiently update and render the plot
+            window.requestAnimationFrame(() => {
+                Plotly.react(uniqueId, plotData.data, plotData.layout);
+            });
+        }
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage(message, true);
+                userInput.value = '';  // Clear the input field
+
+                // Need to add the message to the messages array
+
+                messages.push({role: "user", content: message});
+                
+                
+                // Asynchronously send message along with current state to the server
+                fetch('http://127.0.0.1:5000/deltagpt_api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        messages: messages, 
+                        portfolio: portfolio 
+                    })
+                })
+                .then(response => response.json())  // Parse JSON response
+                .then(data => {
+                    // Update local state with the new data from the server
+                    messages = data.messages;  // Assumes server sends back updated messages
+                    portfolio = data.portfolio;  // Assumes server sends back updated portfolio
+                    
+                    /*
+                    if (data.plot) {  // Check if there is a plot in the response
+                        addPlot(data.plot);  // Function to render plot data
+                    }
+
+                    */
+                    console.log(data.plots);
+                    if (data.plots && Array.isArray(data.plots)) {
+                        data.plots.forEach(plotString => {
+                            try {
+                            const plotData = JSON.parse(plotString);
+                            addPlot(plotData);
+                            } catch (error) {
+                            console.error("Error parsing plot data:", error);
+                            console.log("Problematic plot data:", plotString);
+                            }
+                        });
+                    }
+
+
+                    if (data.messages) {  // Server response text to be displayed
+                        lastMessage = messages[messages.length - 1];
+                        addMessage(lastMessage.content, false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    addMessage("Sorry, there was an error processing your request.", false);
+                });
+
+                              
+                
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+    </script>
+</body>
+</html>
