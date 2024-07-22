@@ -72,6 +72,14 @@ async def gpt_completion(messages, tools):
             "get_portfolio_gamma": get_portfolio_gamma,
             "get_portfolio_value": get_portfolio_value,
             "get_portfolio_value_plot": get_portfolio_value_plot,
+            "get_portfolio_description":get_portfolio_description,
+            "add_straddle_position_to_portfolio":add_straddle_position_to_portfolio,
+            "add_strangle_position_to_portfolio":add_strangle_position_to_portfolio,
+            "add_call_spread_to_portfolio":add_call_spread_to_portfolio,
+            "add_put_spread_to_portfolio":add_put_spread_to_portfolio,
+            "add_butterfly_to_portfolio":add_butterfly_to_portfolio,
+            "empty_portfolio":empty_portfolio, 
+
         }
 
 
@@ -91,6 +99,12 @@ async def gpt_completion(messages, tools):
             "name": function.name,
             "content": content,
         })
+
+        if(function_called.name)=="add_straddle_position_to_portfolio":
+           break
+
+
+
 
     # Now we need to run the response again to give the info to the chatbot
     result = await gpt_completion(messages, tools)

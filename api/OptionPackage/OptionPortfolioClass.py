@@ -9,11 +9,14 @@ class OptionPortfolio:
         self.positions = []
         self.dictionary = []
         if positions_dict is not None and len(positions_dict)>0:
-            print("-----initializing portfolio------")
             for pos in positions_dict:
                 self.add_position_dict(pos)
 
-            print("-----portfolio complete------")
+    def empty_portfolio(self):
+        self.positions = []
+        self.dictionary = []
+
+        return "Emptied portfolio"
 
 
     def add_position_dict(self, position_dict):
@@ -23,11 +26,11 @@ class OptionPortfolio:
         # Extract the info from the position dictionary
         option_flavour = position_dict["option_flavour"]
         option_type = position_dict["option_type"]
-        strike_price = position_dict["strike_price"]
-        quantity = position_dict["quantity"]
+        strike_price = float(position_dict["strike_price"])
+        quantity = int(position_dict["quantity"])
         position = position_dict["position"]
         underlying_ticker = position_dict["underlying_ticker"]
-        barrier = position_dict["barrier_level"]
+        barrier = float(position_dict["barrier_level"]) if position_dict["barrier_level"] else None
         barrier_type = position_dict["barrier_type"]
 
     
@@ -42,18 +45,24 @@ class OptionPortfolio:
             barrier_option = BarrierOption(S0=None, K=strike_price, T=1, r=0.05, sigma=None, H = barrier, barrier_type = barrier_type, option_type=option_type, ticker=underlying_ticker)
             option_position = OptionPosition(barrier_option, position, quantity)
             self.add_position(option_position)
+            print(f"Added {quantity} {option_flavour} to the portfolio, the underlying stock: {underlying_ticker} has price ${option.S0} and calculated volatility of {option.sigma}")
+            return f"Added {quantity} {option_flavour} to the portfolio, the underlying stock: {underlying_ticker} has price ${option.S0} and calculated volatility of {option.sigma}"
 
 
         if option_flavour == "asian":
             asian_option = AsianOption(S0 = None, K = strike_price, T=1, r=0.05, sigma=None, option_type=option_type, asian_type="geometric", ticker = underlying_ticker)
             option_position = OptionPosition(asian_option, position, quantity)
             self.add_position(option_position)
+            print(f"Added {quantity} {option_flavour} to the portfolio, the underlying stock: {underlying_ticker} has price ${option.S0} and calculated volatility of {option.sigma}")
+            return f"Added {quantity} {option_flavour} to the portfolio, the underlying stock: {underlying_ticker} has price ${option.S0} and calculated volatility of {option.sigma}"
 
         
         if option_flavour == "american":
             american_option = AmericanOption(S0 = None, K = strike_price, T=1, r=0.05, sigma=None, option_type=option_type, ticker = underlying_ticker)
             option_position = OptionPosition(american_option, position, quantity)
             self.add_position(option_position)
+            print(f"Added {quantity} {option_flavour} to the portfolio, the underlying stock: {underlying_ticker} has price ${option.S0} and calculated volatility of {option.sigma}")
+            return f"Added {quantity} {option_flavour} to the portfolio, the underlying stock: {underlying_ticker} has price ${option.S0} and calculated volatility of {option.sigma}"
 
     def add_position(self, position):
         self.positions.append(position)
@@ -95,7 +104,7 @@ class OptionPortfolio:
         max_S0 = max(pos.option.S0 for pos in self.positions)
 
         # Set a range around these values
-        S_range = np.linspace(min_S0 * 0.5, max_S0 * 1.5, 100)
+        S_range = np.linspace(min_S0 * 0.1, max_S0 * 3, 50)
 
         return S_range
 
@@ -261,6 +270,6 @@ class OptionPortfolio:
             if option.ticker:
                 description += f"ticker {option.ticker} (price and volatility fetched from yfinance)."
             else:
-                description += f"initial price {option.S0}, strike price {option.K}, maturity {option.T} years, risk-free rate {option.r}, and volatility {option.sigma}."
+                description += f"initial price ${option.S0}, strike price {option.K}, maturity {option.T} years, risk-free rate {option.r}, and volatility {option.sigma}."
             descriptions.append(description)
         return "\n".join(descriptions)
